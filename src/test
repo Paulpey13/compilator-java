@@ -1,0 +1,9 @@
+( 123 )
+
+inst_incremente=
+        {incremente} id equal plus exp
+        ;
+
+inst_ternaire=
+        {ternaire} si [e1]:exp equal number alors retour [e2]:exp sinon retour [e3]:exp
+        ;

@@ -1,0 +1,175 @@
+Package sc;
+
+Helpers
+
+lettre = [['a' .. 'z'] + ['A' .. 'Z']];
+
+Tokens
+
+    number = ['0' .. '9']+;
+    et = '&';
+    ou = '|';
+    plus = '+';
+    inf = '<';
+    minus = '-';
+    div = '/';
+    multiply = '*';
+    equal = '=';
+    non = '!';
+    acc_ouv = '{';
+    acc_fer = '}';
+    crochet_ouv = '[' ;
+    crochet_fer = ']' ;
+    interrogation='?';
+    par_ouv = '(';
+    par_fer = ')';
+    comma = ',';
+    point_vir = ';';
+    plus_equal='+=';
+
+    faire = 'faire' ;
+    tant_que = 'tantque';
+    retour = 'retour';
+    si = 'si';
+    alors = 'alors';
+    ecrire = 'ecrire' ;
+    sinon = 'sinon';
+    entier = 'entier' ;
+
+    id = (lettre | '_' | '$')(lettre | ['0' .. '9'] | '_' | '$')* ;
+    blank = (' ' | 13 | 10)+;
+
+Ignored Tokens
+    blank;
+
+Productions
+
+    programme =
+            {list_dec_variable_opt} list_dec_variable_opt list_dec_function ;
+
+    exp =
+        {ou} exp ou exp1 |
+        {exp1} exp1 ;
+
+    inst_incremente=
+            {incremente} dec_variable plus_equal [e2]:exp
+            ;
+
+    inst_ternaire=
+        {ternaire} crochet_ouv [e1]:exp crochet_fer interrogation [e2]:exp [e3]:exp
+        ;
+
+
+
+
+    call_function =
+        {list_exp} id par_ouv list_exp par_fer ;
+
+    list_exp =
+        {epsilon} |
+        {list_expressions} exp list_exp2 ;
+
+    list_exp2 =
+        {epsilon} |
+        {list_exp_separator} comma exp list_exp2 ;
+
+    inst_affectation =
+        {affectation} id equal exp point_vir |
+        {affectation_tableau} tableau equal exp point_vir ;
+
+    inst_call_function =
+        {call_function} call_function point_vir ;
+
+    inst_tant_que =
+        {tant_que} tant_que exp faire inst_bloc ;
+
+    inst_return =
+        {return} retour exp point_vir ;
+
+    inst_si =
+        {si} si exp alors inst_bloc inst_si_sinon ;
+
+    inst_si_sinon =
+        {sinon} sinon inst_bloc |
+        {epsilon}  ;
+
+    inst_write =
+        {write} ecrire par_ouv exp par_fer point_vir ;
+
+    instruction =
+        {inst_affectation} inst_affectation |
+        {inst_call_function} inst_call_function |
+        {inst_tant_que} inst_tant_que |
+        {inst_return} inst_return |
+        {inst_si} inst_si |
+        {inst_write} inst_write ;
+
+    inst_bloc =
+        {list_instructions} acc_ouv list_inst acc_fer ;
+
+    list_inst =
+        {instruction_list} instruction list_inst |
+        {epsilon} ;
+
+    dec_variable =
+        {type} type id |
+        {tableau} type id crochet_ouv number crochet_fer ;
+
+    tableau =
+        {array_inst} id crochet_ouv exp crochet_fer ;
+
+    type =
+        {entier} entier ;
+
+    list_dec_variable =
+        {list_dec_variable2} dec_variable list_dec_variable2 |
+        {epsilon} ;
+
+    list_dec_variable2 =
+        {dec_variable} comma dec_variable list_dec_variable2 |
+        {epsilon} ;
+
+    list_dec_variable_opt =
+        {dec_var} dec_variable list_dec_variable_opt2 point_vir |
+        {epsilon} ;
+
+    list_dec_variable_opt2 =
+        {list2} comma dec_variable list_dec_variable_opt2 |
+        {epsilon} ;
+
+    dec_function =
+        {list_dec_variable_opt} id par_ouv list_dec_variable par_fer list_dec_variable_opt inst_bloc ;
+
+    list_dec_function =
+        {dec_function} dec_function list_dec_function |
+        {epsilon} ;
+
+    exp1 =
+        {et} exp1 et exp2 |
+        {exp2} exp2 ;
+
+    exp2 =
+        {equal} exp2 equal exp3 |
+        {inf} exp2 inf exp3 |
+        {exp3} exp3 ;
+
+    exp3 =
+        {plus} exp3 plus exp4 |
+        {minus} exp3 minus exp4 |
+        {exp4} exp4 ;
+
+    exp4 =
+        {multiplication} exp4 multiply exp5 |
+        {div} exp4 div exp5 |
+        {exp5} exp5 ;
+
+    exp5 =
+        {non} non exp5 |
+        {exp6} exp6 ;
+
+    exp6 =
+        {exp} par_ouv exp par_fer |
+        {number} number |
+        {id} id |
+        {tableau} tableau |
+        {call_function} call_function ;
